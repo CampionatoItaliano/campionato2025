@@ -137,6 +137,19 @@
     text-align: right;
 }
 
+.classifica-attendere
+{
+    background-color: #f1f1f1;
+    border-bottom: none;
+    text-align: left;
+    font-weight: 400;
+    padding: 8px;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color: #666463;
+    font-size: 18px;
+    text-align: left;
+}
+
 .classifica-col1 {
     width:80px;
     text-align:center;

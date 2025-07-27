@@ -64,124 +64,142 @@ function elabora() {
 
 function caricaMatch(index, url)
 {
-    //Leggo i dati 
-    $.getJSON(url,function(data){
+    if (url != 'https://api.chess.com/pub/match/')
+    {
+        //Leggo i dati 
+        $.getJSON(url,function(data){
 
-        //leggo team
-        var team1 = data.teams.team1.url.substr(27, data.teams.team1.url.length-27);
-        var team2 = data.teams.team2.url.substr(27, data.teams.team2.url.length-27);
-        //Aggiorno partite
-        matchs[index].url = data.url;
-        matchs[index].team1 = team1;
-        matchs[index].team2 = team2;
+            //leggo team
+            var team1 = data.teams.team1.url.substr(27, data.teams.team1.url.length-27);
+            var team2 = data.teams.team2.url.substr(27, data.teams.team2.url.length-27);
+            //Aggiorno partite
+            matchs[index].url = data.url;
+            matchs[index].team1 = team1;
+            matchs[index].team2 = team2;
 
-        if (data.status != 'registration') 
-        {
-            matchs[index].iscritti1 = 0;   //Serve per partite in partenza
-            matchs[index].iscritti2 = 0;   //Serve per partite in partenza
-
-            matchs[index].boards = data.boards;
-            matchs[index].score1 = data.teams.team1.score;
-            matchs[index].score2 = data.teams.team2.score;
-            if (data.teams.team1.score > data.teams.team2.score) 
+            if (data.status != 'registration') 
             {
-                matchs[index].punti1 ++;
-                teams[team1].teamVinte.push(team2);
-                teams[team1].puntiTotali ++;
-            }    
-            if (data.teams.team1.score < data.teams.team2.score) 
-            {
-                matchs[index].punti2 ++;
-                teams[team2].teamVinte.push(team1);
-                teams[team2].puntiTotali ++;
-            }    
-            if (data.teams.team1.score == data.teams.team2.score) {
-                matchs[index].punti1 += 0.5;   
-                matchs[index].punti2 += 0.5;
-                teams[team1].teamPatte.push(team2);
-                teams[team2].teamPatte.push(team1);
-                teams[team1].puntiTotali += 0.5;
-                teams[team2].puntiTotali += 0.5;
-            } 
+                matchs[index].iscritti1 = 0;   //Serve per partite in partenza
+                matchs[index].iscritti2 = 0;   //Serve per partite in partenza
 
-            //Se terminata anche matematicamente
-            if (matchs[index].boards * 2 == matchs[index].score1 + matchs[index].score2 || matchs[index].boards < matchs[index].score1 || matchs[index].boards < matchs[index].score2)
-            {
-                matchs[index].concluso = true;   //Per colore in tabella
-                //Aggiorno punti solo conclusi
-                teams[team1].puntiConclusi += matchs[index].punti1;  
-                teams[team2].puntiConclusi += matchs[index].punti2;
-            }
-            //Controllo giocatori
-            var username1 = '';
-            var username2 = '';
-            var risultato = '';
-            for (var i in data.teams.team1.players) {
-                username1 = data.teams.team1.players[i].username;
-                username2 = data.teams.team2.players[i].username;
-                //Se partita terminata calcolo punteggio
-                //I GIOCATORI NON SONO ABBINATI. Con questi dati non posso 
-                //  calcolare tie-break
-                risultato = data.teams.team1.players[i].played_as_white;
-                setPunti(username1, risultato);
-                risultato = data.teams.team1.players[i].played_as_black;
-                setPunti(username1, risultato);
-                risultato = data.teams.team2.players[i].played_as_white;
-                setPunti(username2, risultato);
-                risultato = data.teams.team2.players[i].played_as_black;
-                setPunti(username2, risultato);
-            }
-        } else {
-            //Partita in partenza salva giocatori iscritti
-            matchs[index].iscritti1 = data.teams.team1.players.length;
-            matchs[index].iscritti2 = data.teams.team2.players.length;
-            //Usati se iniziata
-            matchs[index].boards = 0;
-            matchs[index].punti1 = 0;
-            matchs[index].punti2 = 0;
-            matchs[index].score1 = 0;
-            matchs[index].score2 = 0 ;
-            matchs[index].concluso = false;
+                matchs[index].boards = data.boards;
+                matchs[index].score1 = data.teams.team1.score;
+                matchs[index].score2 = data.teams.team2.score;
+                if (data.teams.team1.score > data.teams.team2.score) 
+                {
+                    matchs[index].punti1 ++;
+                    teams[team1].teamVinte.push(team2);
+                    teams[team1].puntiTotali ++;
+                }    
+                if (data.teams.team1.score < data.teams.team2.score) 
+                {
+                    matchs[index].punti2 ++;
+                    teams[team2].teamVinte.push(team1);
+                    teams[team2].puntiTotali ++;
+                }        
+                if (data.teams.team1.score == data.teams.team2.score) {
+                    matchs[index].punti1 += 0.5;   
+                    matchs[index].punti2 += 0.5;
+                    teams[team1].teamPatte.push(team2);
+                    teams[team2].teamPatte.push(team1);
+                    teams[team1].puntiTotali += 0.5;
+                    teams[team2].puntiTotali += 0.5;
+                } 
 
-        }
-
-        //Se ho caricato tutti i dati calcolo la classifica
-        matchs[index].daCaricare = false;
-        for (var i in matchs) {
-            if (matchs[i].daCaricare) {
-                return;
-            }
-        }
-        
-        //controllo di non aver già lanciato fase sucessiva
-        if (calcolaClassificaRun)
-            return;  
-            calcolaClassificaRun = true;
-
-        //Calcolo la classifica dei team
-        calcolaClassifica();
-  
-    
-    }).error(function(jqXhr, textStatus, error) {
-        //è andato in errore ricarico i dati
-        //Se responseJSON non è valorizzato solo se il record esiste    
-        if (! jqXhr.responseJSON)
-        {
-            console.log('ERRORE ricarico dati: ' + this.url);
-            var index = 0;
-                for (var i in matchs) {
-                    if (matchs[i].url = this.url)
-                        index = i;
-                };
-                caricaMatch(index, this.url);    
+                //Se terminata anche matematicamente
+                if (matchs[index].boards * 2 == matchs[index].score1 + matchs[index].score2 || matchs[index].boards < matchs[index].score1 || matchs[index].boards < matchs[index].score2)
+                {
+                    matchs[index].concluso = true;   //Per colore in tabella
+                    //Aggiorno punti solo conclusi
+                    teams[team1].puntiConclusi += matchs[index].punti1;  
+                    teams[team2].puntiConclusi += matchs[index].punti2;
+                }
+                //Controllo giocatori
+                var username1 = '';
+                var username2 = '';
+                var risultato = '';
+                for (var i in data.teams.team1.players) {
+                    username1 = data.teams.team1.players[i].username;
+                    username2 = data.teams.team2.players[i].username;
+                    //Se partita terminata calcolo punteggio
+                    //I GIOCATORI NON SONO ABBINATI. Con questi dati non posso 
+                    //  calcolare tie-break
+                    risultato = data.teams.team1.players[i].played_as_white;
+                    setPunti(username1, risultato);
+                    risultato = data.teams.team1.players[i].played_as_black;
+                    setPunti(username1, risultato);
+                    risultato = data.teams.team2.players[i].played_as_white;
+                    setPunti(username2, risultato);
+                    risultato = data.teams.team2.players[i].played_as_black;
+                    setPunti(username2, risultato);
+                }
             } else {
-                console.log('ERRORE Match non valida. ' + this.url);
-                console.log('ERRORE Match non valida. ' + this.url);
-                console.log('ERRORE Match non valida. ' + this.url);
-                console.log('ERRORE Match non valida. ' + this.url);
+                //Partita in partenza salva giocatori iscritti
+                matchs[index].iscritti1 = data.teams.team1.players.length;
+                matchs[index].iscritti2 = data.teams.team2.players.length;
+                //Usati se iniziata
+                matchs[index].boards = 0;
+                matchs[index].punti1 = 0;
+                matchs[index].punti2 = 0;
+                matchs[index].score1 = 0;
+                matchs[index].score2 = 0 ;
+                matchs[index].concluso = false;
+
             }
+
+            //Se ho caricato tutti i dati calcolo la classifica
+            matchs[index].daCaricare = false;
+            for (var i in matchs) {
+                if (matchs[i].daCaricare) {
+                    return;
+                }
+            }
+        
+            //controllo di non aver già lanciato fase sucessiva
+            if (calcolaClassificaRun)
+                return;  
+                calcolaClassificaRun = true;
+
+            //Calcolo la classifica dei team
+            calcolaClassifica();
+      
+        }).error(function(jqXhr, textStatus, error) {
+            //è andato in errore ricarico i dati
+            //Se responseJSON non è valorizzato solo se il record esiste    
+            if (! jqXhr.responseJSON)
+            {
+                console.log('ERRORE ricarico dati: ' + this.url);
+                var index = 0;
+                    for (var i in matchs) {
+                        if (matchs[i].url = this.url)
+                            index = i;
+                    };
+                    caricaMatch(index, this.url);    
+                } else {
+                    console.log('ERRORE Match non valida. ' + this.url);
+                    console.log('ERRORE Match non valida. ' + this.url);
+                    console.log('ERRORE Match non valida. ' + this.url);
+                    console.log('ERRORE Match non valida. ' + this.url);
+                }
               
-        });
+            });
+    } else {
+            //Se ho caricato tutti i dati calcolo la classifica
+            matchs[index].daCaricare = false;
+            for (var i in matchs) {
+                if (matchs[i].daCaricare) {
+                    return;
+                }
+            }
+        
+            //controllo di non aver già lanciato fase sucessiva
+            if (calcolaClassificaRun)
+                return;  
+                calcolaClassificaRun = true;
+
+            //Calcolo la classifica dei team
+           calcolaClassifica();
+    }
 };
 
 //calcolo classifica team
@@ -274,7 +292,6 @@ function calcolaClassifica()
     //Riga team
     for (var i in classificaTeams)         
     {
-        debugger;
         gruppo = classificaTeams[i];
         stRiga = '<tr class="classifica-risultati">' +
             '<td class="classifica-risultati">' + teams[gruppo].posizione + '</td>' +
