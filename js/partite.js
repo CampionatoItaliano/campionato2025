@@ -108,7 +108,7 @@ matchs[114] = {"id":"https://api.chess.com/pub/match/1822416", "daCaricare":true
 matchs[115] = {"id":"https://api.chess.com/pub/match/1821528", "daCaricare":true, "punti1":0, "punti2":0, "concluso": false};
 matchs[116] = {"id":"https://api.chess.com/pub/match/1822054", "daCaricare":true, "punti1":0, "punti2":0, "concluso": false};
 matchs[117] = {"id":"https://api.chess.com/pub/match/1821636", "daCaricare":true, "punti1":0, "punti2":0, "concluso": false};
-matchs[118] = {"id":"https://api.chess.com/pub/match/", "daCaricare":true, "punti1":0, "punti2":0, "concluso": false};
+matchs[118] = {"id":"https://api.chess.com/pub/match/1823148", "daCaricare":true, "punti1":0, "punti2":0, "concluso": false};
 /*
 //Turno 12
 matchs[121] = {"id":"https://api.chess.com/pub/match/", "daCaricare":true, "punti1":0, "punti2":0, "concluso": false};
